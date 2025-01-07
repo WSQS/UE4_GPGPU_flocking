@@ -6,62 +6,57 @@
 #include "Components/StaticMeshComponent.h"
 
 // Sets default values
-AInstancingRootActor::AInstancingRootActor()
-{
-	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+AInstancingRootActor::AInstancingRootActor() {
+    // Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+    PrimaryActorTick.bCanEverTick = true;
 
-	//this staticmeshComponent act as the bound of the UInstancedStaticMeshComponent ot avoid blink
-	rootStaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("rootStaticMesh"));
-	RootComponent = rootStaticMesh;
+    //this staticmeshComponent act as the bound of the UInstancedStaticMeshComponent ot avoid blink
+    rootStaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("rootStaticMesh"));
+    RootComponent = rootStaticMesh;
 
-	InstancedComponent = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("UInstancedStaticMeshComponent"));
-	InstancedComponent->SetupAttachment(rootStaticMesh);
+    InstancedComponent = CreateDefaultSubobject<UInstancedStaticMeshComponent>(
+        TEXT("UInstancedStaticMeshComponent"));
+    InstancedComponent->SetupAttachment(rootStaticMesh);
 
-	//set the number of custom data needed
-	InstancedComponent->NumCustomDataFloats = 1;
-	InstancedComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    //set the number of custom data needed
+    InstancedComponent->NumCustomDataFloats = 2;
+    InstancedComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
-void AInstancingRootActor::InitInstances(int instatnceNum)
-{
-	instatnceNum = FMath::Clamp(instatnceNum,0,25600);
-	InstancedComponent->ClearInstances();
-	//create instances
-	for (int i = 0; i < instatnceNum; i++)
-	{
-		//t.SetLocation(FVector(FMath::RandRange(-100, 100) * i, FMath::RandRange(-1024, 1024), FMath::RandRange(-1024, 1024)));
-		InstancedComponent->AddInstance({});
-		InstancedComponent->SetCustomDataValue(i, 0, i);
-		UE_LOG(LogTemp, Warning, TEXT("AddInstance %d"), i);
-	}
+void AInstancingRootActor::InitInstances(int instatnceNum) {
+    instatnceNum = FMath::Clamp(instatnceNum, 0, 25600);
+    InstancedComponent->ClearInstances();
+    //create instances
+    for (int i = 0; i < instatnceNum; i++) {
+        //t.SetLocation(FVector(FMath::RandRange(-100, 100) * i, FMath::RandRange(-1024, 1024), FMath::RandRange(-1024, 1024)));
+        InstancedComponent->AddInstance({});
+        // InstancedComponent->SetCustomDataValue(i, 0, i % 128);
+        InstancedComponent->SetCustomData(i,
+            {static_cast<float>(i / 128), static_cast<float>(i % 128)});
+        UE_LOG(LogTemp, Warning, TEXT("AddInstance %d"), i);
+    }
 }
 
 
-int AInstancingRootActor::GetInstanceCount()
-{
-	if (InstancedComponent != nullptr)
-	{
-		return InstancedComponent->GetInstanceCount();
-	}
-	return 0;
+int AInstancingRootActor::GetInstanceCount() {
+    if (InstancedComponent != nullptr) {
+        return InstancedComponent->GetInstanceCount();
+    }
+    return 0;
 }
 
 // Called when the game starts or when spawned
-void AInstancingRootActor::BeginPlay()
-{
-	Super::BeginPlay();
-	//create the material used to draw instance
-	if (DrawMat != nullptr)
-	{
-		DrawMatInstance = InstancedComponent->CreateDynamicMaterialInstance(0, DrawMat);
-		InitInstances(25600);
-		UE_LOG(LogTemp, Warning, TEXT("InitInstances!"));
-	}
+void AInstancingRootActor::BeginPlay() {
+    Super::BeginPlay();
+    //create the material used to draw instance
+    if (DrawMat != nullptr) {
+        DrawMatInstance = InstancedComponent->CreateDynamicMaterialInstance(0, DrawMat);
+        InitInstances(25600);
+        UE_LOG(LogTemp, Warning, TEXT("InitInstances!"));
+    }
 }
 
 // Called every frame
-void AInstancingRootActor::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
+void AInstancingRootActor::Tick(float DeltaTime) {
+    Super::Tick(DeltaTime);
 }
