@@ -5,69 +5,70 @@
 #include "FlockingComputeShader.h"
 
 // Sets default values
-ACSTestActor::ACSTestActor()
-{
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-	SeparationForceScaler = 1.0;
-	CohesionForceScaler = 1.0;
-	AlignForceScaler = 1.0;
+ACSTestActor::ACSTestActor() {
+    // Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+    PrimaryActorTick.bCanEverTick = false;
+    SeparationForceScaler = 1.0;
+    CohesionForceScaler = 1.0;
+    AlignForceScaler = 1.0;
 }
 
 // Called when the game starts or when spawned
-void ACSTestActor::BeginPlay()
-{
-	Super::BeginPlay();
-	FFlockingComputeShader::Get().BeginRendering();
+void ACSTestActor::BeginPlay() {
+    Super::BeginPlay();
+    FFlockingComputeShader::Get().BeginRendering();
 
-	if (myTexture != NULL) textureResource = (FTextureRenderTarget2DResource*)myTexture->Resource;
-	
+    if (myTexture != NULL)
+        textureResource = (FTextureRenderTarget2DResource *)myTexture->Resource;
+    
+    FShaderUsageExampleParameters DrawParameters(VelocityRenderTarget, PositionRenderTarget);
+    {
+        DrawParameters.Range = Range;
+        DrawParameters.AlignScaler = AlignForceScaler;
+        DrawParameters.CohesionScaler = CohesionForceScaler;
+        DrawParameters.SeparationScaler = SeparationForceScaler;
+    }
+    FFlockingComputeShader::Get().UpdateParameters(DrawParameters);
 }
 
-void ACSTestActor::BeginDestroy()
-{
-	FFlockingComputeShader::Get().EndRendering();
-	Super::BeginDestroy();
+void ACSTestActor::BeginDestroy() {
+    FFlockingComputeShader::Get().EndRendering();
+    Super::BeginDestroy();
 }
 
 // Called every frame
-void ACSTestActor::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-	FShaderUsageExampleParameters DrawParameters(VelocityRenderTarget, PositionRenderTarget);
-	{
-		DrawParameters.Range = Range;
-		DrawParameters.AlignScaler = AlignForceScaler;
-		DrawParameters.CohesionScaler = CohesionForceScaler;
-		DrawParameters.SeparationScaler = SeparationForceScaler;
-	}
-	FFlockingComputeShader::Get().UpdateParameters(DrawParameters);
+void ACSTestActor::Tick(float DeltaTime) {
+    Super::Tick(DeltaTime);
+    FShaderUsageExampleParameters DrawParameters(VelocityRenderTarget, PositionRenderTarget);
+    {
+        DrawParameters.Range = Range;
+        DrawParameters.AlignScaler = AlignForceScaler;
+        DrawParameters.CohesionScaler = CohesionForceScaler;
+        DrawParameters.SeparationScaler = SeparationForceScaler;
+    }
+    FFlockingComputeShader::Get().UpdateParameters(DrawParameters);
 
+    //TArray<FColor> ColorBuffer;
 
-	//TArray<FColor> ColorBuffer;
-	
-	if (myTexture != NULL)
-	{
+    if (myTexture != NULL) {
 
-		//FTextureRenderTarget2DResource* textureResource = (FTextureRenderTarget2DResource*)myTexture->Resource;
+        //FTextureRenderTarget2DResource* textureResource = (FTextureRenderTarget2DResource*)myTexture->Resource;
 
-		//if (textureResource->ReadPixels(ColorBuffer))
-		//{
+        //if (textureResource->ReadPixels(ColorBuffer))
+        //{
 
-		//	//UE_LOG(LogTemp, Warning, TEXT("%d"), ColorBuffer[0].R);
+        //	//UE_LOG(LogTemp, Warning, TEXT("%d"), ColorBuffer[0].R);
 
-		//}
+        //}
 
-		if (textureResource->ReadFloat16Pixels(ColorBuffer16))
-		{
-			//FFloat16 r = ColorBuffer16[0].R;
-			float x = ColorBuffer16[0].R.GetFloat();
-			float y = ColorBuffer16[0].G.GetFloat();
-			float z = ColorBuffer16[0].B.GetFloat();
-			//UE_LOG(LogTemp, Warning, TEXT("f is  %f"), f);
-			SetActorLocation(FVector(x, y, z));//??? 
-		}
-	}
+        if (textureResource->ReadFloat16Pixels(ColorBuffer16)) {
+            //FFloat16 r = ColorBuffer16[0].R;
+            float x = ColorBuffer16[0].R.GetFloat();
+            float y = ColorBuffer16[0].G.GetFloat();
+            float z = ColorBuffer16[0].B.GetFloat();
+            //UE_LOG(LogTemp, Warning, TEXT("f is  %f"), f);
+            SetActorLocation(FVector(x, y, z)); //??? 
+        }
+    }
 
 }
-
