@@ -8,7 +8,7 @@
 // Sets default values
 AInstancingRootActor::AInstancingRootActor()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	//this staticmeshComponent act as the bound of the UInstancedStaticMeshComponent ot avoid blink
@@ -25,24 +25,16 @@ AInstancingRootActor::AInstancingRootActor()
 
 void AInstancingRootActor::InitInstances(int instatnceNum)
 {
-	if (instatnceNum <= 1)
-	{
-		instatnceNum = 1;
-	}
-	else if (instatnceNum > 25600)
-	{
-		instatnceNum = 25600;
-	}
+	instatnceNum = FMath::Clamp(instatnceNum,0,25600);
 	InstancedComponent->ClearInstances();
-		//create instances
-		for (int i = 0; i < instatnceNum; i++)
-		{
-			FTransform t = FTransform();
-			//t.SetLocation(FVector(FMath::RandRange(-100, 100) * i, FMath::RandRange(-1024, 1024), FMath::RandRange(-1024, 1024)));
-			InstancedComponent->AddInstance(t);
-			InstancedComponent->SetCustomDataValue(i, 0, i);
-			UE_LOG(LogTemp, Warning, TEXT("AddInstance %d"), i);
-		}
+	//create instances
+	for (int i = 0; i < instatnceNum; i++)
+	{
+		//t.SetLocation(FVector(FMath::RandRange(-100, 100) * i, FMath::RandRange(-1024, 1024), FMath::RandRange(-1024, 1024)));
+		InstancedComponent->AddInstance({});
+		InstancedComponent->SetCustomDataValue(i, 0, i);
+		UE_LOG(LogTemp, Warning, TEXT("AddInstance %d"), i);
+	}
 }
 
 
@@ -72,8 +64,4 @@ void AInstancingRootActor::BeginPlay()
 void AInstancingRootActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
-
-
-
