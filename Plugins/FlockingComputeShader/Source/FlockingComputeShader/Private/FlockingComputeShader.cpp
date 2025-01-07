@@ -38,9 +38,7 @@ void FFlockingComputeShader::BeginRendering() {
 
     bCachedParametersValid = false;
 
-    const FName RendererModuleName("Renderer");
-    IRendererModule *RendererModule = FModuleManager::GetModulePtr<IRendererModule>(
-        RendererModuleName);
+    IRendererModule *RendererModule = FModuleManager::GetModulePtr<IRendererModule>(TEXT("Renderer"));
     if (RendererModule) {
         OnPostResolvedSceneColorHandle = RendererModule->GetResolvedSceneColorCallbacks().AddRaw(
             this, &FFlockingComputeShader::PostResolveSceneColor_RenderThread);
